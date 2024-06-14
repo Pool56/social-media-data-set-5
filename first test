@@ -1,0 +1,61 @@
+from datetime import datetime, timedelta
+import math
+
+# Sample data
+social_media_data = {
+    'PlatformA': [
+        {'timestamp': datetime.now() - timedelta(days=1), 'rating': 4.5, 'posts': 100},
+        {'timestamp': datetime.now() - timedelta(days=2), 'rating': 3.8, 'posts': 150},
+        {'timestamp': datetime.now() - timedelta(days=5), 'rating': 4.2, 'posts': 200},
+    ],
+    'PlatformB': [
+        {'timestamp': datetime.now() - timedelta(days=1), 'rating': 4.8, 'posts': 80},
+        {'timestamp': datetime.now() - timedelta(days=3), 'rating': 4.0, 'posts': 100},
+        {'timestamp': datetime.now() - timedelta(days=4), 'rating': 4.1, 'posts': 90},
+    ],
+    'PlatformC': [
+        {'timestamp': datetime.now() - timedelta(days=2), 'rating': 3.5, 'posts': 200},
+        {'timestamp': datetime.now() - timedelta(days=3), 'rating': 3.7, 'posts': 180},
+        {'timestamp': datetime.now() - timedelta(days=6), 'rating': 3.9, 'posts': 210},
+    ],
+}
+
+# Constants
+CURRENT_TIME = datetime.now()
+TIME_DECAY_FACTOR = 0.1  # Adjusts how much the time affects the score
+
+def calculate_time_decay(days: int) -> float:
+    """Calculate a decay factor based on the age of the post."""
+    return math.exp(-TIME_DECAY_FACTOR * days)
+
+def rate_platform(data):
+    """Calculate the rating for a given platform."""
+    total_score = 0
+    total_posts = 0
+
+    for entry in data:
+        days_old = (CURRENT_TIME - entry['timestamp']).days
+        decay_factor = calculate_time_decay(days_old)
+        weighted_rating = entry['rating'] * decay_factor
+        weighted_posts = entry['posts'] * decay_factor
+        
+        total_score += weighted_rating * entry['posts']
+        total_posts += weighted_posts
+
+    return total_score / total_posts if total_posts else 0
+
+def main():
+    platform_ratings = {}
+    
+    for platform, data in social_media_data.items():
+        platform_ratings[platform] = rate_platform(data)
+    
+    # Sort platforms by their rating
+    sorted_platforms = sorted(platform_ratings.items(), key=lambda item: item[1], reverse=True)
+    
+    print("Social Media Platform Ratings:")
+    for platform, rating in sorted_platforms:
+        print(f"{platform}: {rating:.2f}")
+
+if __name__ == "__main__":
+    main()
